@@ -1,0 +1,10 @@
+version: 1.0
+shards:
+  admiral:
+    github: jwaldrip/admiral.cr
+    version: 1.7.2
+
+  openssl_ext:
+    github: randomstate/openssl_ext
+    version: 0.1.1
+
