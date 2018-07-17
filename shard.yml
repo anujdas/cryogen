@@ -15,5 +15,3 @@ license: MIT
 dependencies:
   admiral:
     github: jwaldrip/admiral.cr
-  openssl_ext:
-    github: randomstate/openssl_ext
