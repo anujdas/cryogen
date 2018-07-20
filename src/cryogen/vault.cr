@@ -2,6 +2,7 @@ require "file"
 require "yaml"
 
 require "./crypto"
+require "./error"
 
 module Cryogen
   alias Prefix = String
@@ -36,8 +37,15 @@ module Cryogen
     end
 
     private def self.parse_yaml(yaml : YAML::Any) : self
+      raise Error::VaultInvalid.new unless yaml.as_h?
       hash = yaml.as_h.each_with_object({} of Prefix => Entry | Value) do |(key, val), h|
-        h[key.as_s] = val.as_h? ? parse_yaml(val) : val.as_s
+        h[key.as_s] = if val.as_h?
+                        parse_yaml(val)
+                      elsif val.as_s?
+                        val.as_s
+                      else
+                        raise Error::VaultInvalid.new
+                      end
       end
       new(hash)
     end

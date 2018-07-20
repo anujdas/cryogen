@@ -42,6 +42,18 @@ module Cryogen
       end
     end
 
+    class VaultInvalid < Error
+      def initialize
+        super "Invalid vault! Only strings are supported as keys and values, and the top level must be a mapping"
+      end
+    end
+
+    class DecryptionError < Error
+      def initialize(openssl_error : OpenSSL::Cipher::Error)
+        super "Decryption failed! Make sure you have the right key. (#{openssl_error.message})"
+      end
+    end
+
     class TTYRequired < Error
       def initialize
         super "TTY required for this operation; try again from an interactive console"
@@ -63,12 +75,6 @@ module Cryogen
     class EditorFailed < Error
       def initialize
         super "Editor exited unsuccessfully; changes not applied."
-      end
-    end
-
-    class DecryptionError < Error
-      def initialize(openssl_error : OpenSSL::Cipher::Error)
-        super "Decryption failed! Make sure you have the right key. (#{openssl_error.message})"
       end
     end
 
