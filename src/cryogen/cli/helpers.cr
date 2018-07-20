@@ -22,12 +22,12 @@ module Cryogen
       end
 
       def obtain_key! : Key
-        if File.exists?(Cryogen::KEY_FILE)
-          Key.load(Cryogen::KEY_FILE)
-        elsif ENV["CRYOGEN_PASSWORD"]?
+        if ENV["CRYOGEN_PASSWORD"]?
           Key.from_password(ENV["CRYOGEN_PASSWORD"]) 
+        elsif File.exists?(Cryogen::KEY_FILE)
+          Key.load(Cryogen::KEY_FILE)
         elsif STDIN.tty?
-          password = prompt("Enter the password and hit [Enter]:")
+          password = prompt("Enter the password and hit [Enter]:", echo: false)
           Key.from_password(password)
         else
           raise Error::KeyNotFound.new
@@ -43,10 +43,12 @@ module Cryogen
         raise Error::EditorNotSet.new unless ENV["EDITOR"]?
       end
 
-      def prompt(prompt_str : String) : String
+      def prompt(prompt_str : String, echo : Bool = true) : String
         require_tty!
         print "#{prompt_str} "
-        gets("\n").to_s.strip
+        raw_input = echo ? gets : STDIN.noecho(&.gets)
+        puts unless echo # this is silly
+        raw_input.to_s.chomp
       end
     end
   end

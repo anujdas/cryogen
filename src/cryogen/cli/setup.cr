@@ -14,7 +14,7 @@ module Cryogen
         require_tty!
         handle_existing_vault!
 
-        password = prompt("Enter a password (the encryption key will be derived from it, so make it secure and save it!):")
+        password = prompt("Enter a password (the encryption key will be derived from it, so make it secure and save it!):", echo: false)
         key = Key.from_password(password)
 
         Dir.mkdir_p(Cryogen::BASE_DIR) unless Dir.exists?(Cryogen::BASE_DIR)
@@ -30,8 +30,8 @@ module Cryogen
 
         raise Error::VaultInitialised.new unless flags.force
 
-        print "Are you sure you want to delete the existing key and vault? This action cannot be undone! [Y/n]: "
-        raise Error::OperationCancelled.new unless "Y" == gets("\n").to_s.strip
+        yes_no = prompt("Are you sure you want to delete the existing key and vault? This action cannot be undone! [Y/n]:")
+        raise Error::OperationCancelled.new unless "Y" == yes_no
 
         File.delete(Cryogen::KEY_FILE) if File.exists?(Cryogen::KEY_FILE)
         File.delete(Cryogen::VAULT_FILE) if File.exists?(Cryogen::VAULT_FILE)
