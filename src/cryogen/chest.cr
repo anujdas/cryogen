@@ -5,8 +5,25 @@ require "./crypto"
 
 module Cryogen
   class Chest
-    record EncryptedEntry, value : Nil | String | Hash(String, EncryptedEntry)
-    record Entry, value : Nil | String | Hash(String, Entry)
+    alias Prefix = String
+    alias Value = String
+    alias EncryptedValue = String
+
+    record Entry, value : Hash(Prefix, Entry | Value) do
+      def to_yaml(io)
+        value.to_yaml(io)
+      end
+    end
+
+    record EncryptedEntry, value : Hash(Prefix, EncryptedEntry | EncryptedValue) do
+      def to_yaml(io)
+        value.to_yaml(io)
+      end
+    end
+
+    def self.blank_contents : Entry
+      Entry.new({} of Prefix => Entry | Value)
+    end
 
     def initialize(@chest_file : String, @key : Key)
     end
@@ -29,37 +46,28 @@ module Cryogen
     end
 
     private def parse_yaml(yaml_hash : Hash) : EncryptedEntry
-      hash = yaml_hash.each_with_object({} of String => EncryptedEntry) do |(key, val), h|
-        h[key.as_s] = val.as_h? ? parse_yaml(val.as_h) : EncryptedEntry.new(val.as_s)
+      hash = yaml_hash.each_with_object({} of Prefix => EncryptedEntry | EncryptedValue) do |(key, val), h|
+        h[key.as_s] = val.as_h? ? parse_yaml(val.as_h) : val.as_s
       end
 
       EncryptedEntry.new(hash)
     end
 
-    private def decrypt(encrypted_entry : EncryptedEntry) : Entry
-      decrypted_value = 
-        case value = encrypted_entry.value
-        when String
-          Crypto.verify_and_decrypt(value, @key)
-        when Hash
-          value.each_with_object({} of String => Entry) { |(key, val), h| h[key] = decrypt(val) }
+    private def encrypt(decrypted_entry : Entry) : EncryptedEntry
+      hash = decrypted_entry.value.
+        each_with_object({} of Prefix => EncryptedEntry | EncryptedValue) do |(key, val), h|
+          h[key] = val.is_a?(Entry) ? encrypt(val) : Crypto.encrypt_and_sign(val, @key)
         end
 
-      Entry.new(decrypted_value)
+      EncryptedEntry.new(hash)
     end
 
-    private def encrypt(decrypted_entry : Entry) : EncryptedEntry
-      encrypted_value = 
-        case value = decrypted_entry.value
-        when String
-          Crypto.encrypt_and_sign(value, @key)
-        when Hash
-          value.each_with_object({} of String => EncryptedEntry) do |(key, val), h|
-            h[key] = encrypt(val)
-          end
-        end
+    private def decrypt(encrypted_entry : EncryptedEntry) : Entry
+      hash = encrypted_entry.value.each_with_object({} of Prefix => Entry | Value) do |(key, val), h|
+        h[key] = val.is_a?(EncryptedEntry) ? decrypt(val) : Crypto.verify_and_decrypt(val, @key)
+      end
 
-      EncryptedEntry.new(encrypted_value)
+      Entry.new(hash)
     end
   end
 end

@@ -15,9 +15,9 @@ module Cryogen
       cipher = OpenSSL::Cipher.new(CIPHER_MODE)
       cipher.encrypt
       cipher.key = key.cipher_key
-      iv = cipher.random_iv
+      iv = cipher.random_iv.to_s
       io = IO::Memory.new
-      io.write(cipher.update(decrypted_value))
+      io.write(cipher.update(value))
       io.write(cipher.final)
       data = io.to_slice.hexstring
 

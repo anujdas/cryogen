@@ -1,15 +1,18 @@
 require "admiral"
-require "file"
 
 require "../chest"
 require "../key"
 
 module Cryogen
   module Command
-    class Show < Admiral::Command
-      define_help description: "Displays the decrypted contents of this directory's chest"
+    class Edit < Admiral::Command
+      define_help description: "Opens $EDITOR to edit the current chest"
 
       def run
+        unless ENV["EDITOR"]
+          raise "$EDITOR not set -- try, e.g., `export EDITOR=nano` before proceeding."
+        end
+
         unless File.exists?(Cryogen::CHEST_FILE)
           raise "Chest file not found -- have you called `cryogen setup` yet?"
         end
@@ -23,7 +26,6 @@ module Cryogen
               end
 
         chest = Chest.new(Cryogen::CHEST_FILE, key)
-        puts chest.decrypted_contents.to_yaml
       end
     end
   end
