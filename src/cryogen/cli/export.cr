@@ -16,7 +16,7 @@ module Cryogen
         key = obtain_key!
         vault = LockedVault.load(Cryogen::VAULT_FILE).unlock!(key)
         vault.to_env.each do |prefix, value|
-          puts "#{"export " if flags.no_subprocess}#{prefix}=#{value}"
+          puts "#{"export " unless flags.no_subprocess}#{prefix}=#{value}"
         end
       end
     end
