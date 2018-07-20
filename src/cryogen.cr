@@ -1,9 +1,9 @@
-require "./cryogen/cli"
+require "./cryogen/*"
 
 module Cryogen
   BASE_DIR = ".cryogen"
-  CHEST_FILE = "#{BASE_DIR}/chest.yml"
-  KEY_FILE = "#{BASE_DIR}/key"
+  VAULT_FILE = "#{BASE_DIR}/vault.yml"
+  KEY_FILE = "#{BASE_DIR}/secret_key"
 end
 
 Cryogen::CLI.run

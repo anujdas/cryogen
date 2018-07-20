@@ -6,8 +6,9 @@ require "../key"
 
 module Cryogen
   module Command
-    class Show < Admiral::Command
-      define_help description: "Displays the decrypted contents of this directory's vault"
+    class Export < Admiral::Command
+      define_help description: "Exports the unlocked vault in a shell-friendly (ENV variable) format"
+      define_flag no_subprocess : Bool, description: "Skips prepending of `export` to ENV vars, making them invisible to subprocesses"
 
       def run
         unless File.exists?(Cryogen::VAULT_FILE)
@@ -23,7 +24,9 @@ module Cryogen
               end
 
         vault = LockedVault.load(Cryogen::VAULT_FILE).unlock!(key)
-        puts vault.to_yaml
+        vault.to_env.each do |prefix, value|
+          puts "#{"export " if flags.no_subprocess}#{prefix}=#{value}"
+        end
       end
     end
   end
