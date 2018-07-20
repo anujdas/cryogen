@@ -1,22 +1,32 @@
 require "admiral"
+require "colorize"
 
-require "./command/*"
+Colorize.on_tty_only! # turn on STDOUT/STDERR colours if available
+
+require "./cli/*"
+require "./error"
 
 module Cryogen
-  class CLI < Admiral::Command
-    register_sub_command setup : Command::Setup, description: "Initialize a vault in this directory"
-    register_sub_command show : Command::Show, description: "Show decrypted contents of vault"
-    register_sub_command export : Command::Export,
-      description: "Print decrypted vault contents in shell `eval`-able ENV format"
-    register_sub_command edit : Command::Edit, description: "Opens the vault in $EDITOR"
-    register_sub_command unlock : Command::Unlock, description: "Unlock the vault"
-    register_sub_command lock : Command::Lock, description: "Lock the vault"
+  module CLI
+    class Main < Admiral::Command
+      register_sub_command setup : CLI::Setup, description: "Initialize a vault in this directory"
+      register_sub_command show : CLI::Show, description: "Show decrypted contents of vault"
+      register_sub_command export : CLI::Export,
+        description: "Print decrypted vault contents in shell `eval`-able ENV format"
+      register_sub_command edit : CLI::Edit, description: "Opens the vault in $EDITOR"
+      register_sub_command unlock : CLI::Unlock, description: "Unlock the vault"
+      register_sub_command lock : CLI::Lock, description: "Lock the vault"
 
-    define_help description: "A tool for managing secrets"
-    define_version VERSION
+      define_help description: "A tool for managing secrets"
+      define_version VERSION
 
-    def run
-      puts help
+      rescue_from Error do |e|
+        panic e.message.colorize(:red)
+      end
+
+      def run
+        puts help
+      end
     end
   end
 end

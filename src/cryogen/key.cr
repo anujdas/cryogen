@@ -2,6 +2,8 @@ require "crypto/bcrypt/password"
 require "file"
 require "openssl"
 
+require "./error"
+
 module Cryogen
   class Key
     @cipher_key : Bytes
@@ -26,7 +28,7 @@ module Cryogen
     # Given a 512-bit key, splits it into a 256-bit encryption key and a
     # 256-bit signing key
     def initialize(key_material : Bytes)
-      raise "Key must be 512 bits" unless key_material.size == 64 # bytes
+      raise Error::KeyInvalid.new unless key_material.size == 64 # bytes
       @cipher_key = key_material[0, 32]
       @signing_key = key_material[16, 32]
     end

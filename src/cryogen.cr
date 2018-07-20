@@ -6,4 +6,4 @@ module Cryogen
   KEY_FILE = "#{BASE_DIR}/secret_key"
 end
 
-Cryogen::CLI.run
+Cryogen::CLI::Main.run

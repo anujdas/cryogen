@@ -2,6 +2,7 @@ require "base64"
 require "openssl/cipher"
 require "openssl/hmac"
 
+require "./error"
 require "./key"
 
 module Cryogen
@@ -35,7 +36,7 @@ module Cryogen
 
       # verify HMAC-256 before decoding
       calculated_sig = OpenSSL::HMAC.digest(SIG_MODE, key.signing_key, iv + encrypted_string)
-      raise "Signature check failed" unless calculated_sig == sig
+      raise Error::SignatureInvalid.new unless calculated_sig == sig
 
       # decode using AES-256-CBC
       cipher = OpenSSL::Cipher.new(CIPHER_MODE)
@@ -46,6 +47,8 @@ module Cryogen
         io.write(cipher.update(encrypted_string))
         io.write(cipher.final)
       end.to_s
+    rescue e : OpenSSL::Cipher::Error
+      raise Error::DecryptionError.new(e)
     end
   end
 end
