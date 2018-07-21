@@ -1,8 +1,10 @@
+require "./key"
+
 module Cryogen
   class Error < Exception
     class KeyInvalid < Error
       def initialize
-        super "Key must be exactly 512 bits (64 bytes)"
+        super "Key must be exactly #{Key::KEY_BYTES * 2} bytes in length"
       end
     end
 
