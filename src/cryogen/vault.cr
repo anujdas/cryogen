@@ -8,30 +8,27 @@ module Cryogen
   abstract struct Vault
     struct Entry
       alias Identifier = String
-      alias Value = String
-
-      def self.from_yaml(string_or_io) : self
-        parse_yaml(YAML.parse(string_or_io))
-      end
+      alias Secret = String
+      alias ValueType = Hash(Identifier, self | Secret)
 
       def self.empty : self
-        new({} of Identifier => self | Value)
+        new(ValueType.new)
       end
 
       delegate to_yaml, to: @value
 
-      def initialize(@value : Hash(Identifier, Entry | Value))
+      def initialize(@value : ValueType)
       end
 
       def decrypt(key : Key) : self
-        hash = @value.each_with_object({} of Identifier => Entry | Value) do |(prefix, val), h|
+        hash = @value.each_with_object(ValueType.new) do |(prefix, val), h|
           h[prefix] = val.is_a?(Entry) ? val.decrypt(key) : Crypto.verify_and_decrypt(val, key)
         end
         self.class.new(hash)
       end
 
       def encrypt(key : Key) : self
-        hash = @value.each_with_object({} of Identifier => Entry | Value) do |(prefix, val), h|
+        hash = @value.each_with_object(ValueType.new) do |(prefix, val), h|
           h[prefix] = val.is_a?(Entry) ? val.encrypt(key) : Crypto.encrypt_and_sign(val, key)
         end
         self.class.new(hash)
@@ -44,19 +41,22 @@ module Cryogen
         end
       end
 
-      private def self.parse_yaml(yaml : YAML::Any) : self
-        raise Error::VaultInvalid.new unless yaml.as_h?
-        hash = yaml.as_h.each_with_object({} of Identifier => Entry | Value) do |(key, val), h|
-          raise Error::VaultInvalid.new unless key.as_s?
-          h[key.as_s] = if val.as_h?
-                          parse_yaml(val)
-                        elsif val.as_s?
-                          val.as_s
-                        else
-                          raise Error::VaultInvalid.new
-                        end
-        end
+      ### YAML parsing helpers (providing detailed format validation)
+
+      def self.new(ctx : YAML::ParseContext, node : YAML::Nodes::Node)
+        ctx.read_alias(node, self) { |obj| return obj }
+        hash = ValueType.new
+        ctx.record_anchor(node, hash)
+        new(ctx, node) { |identifer, value| hash[identifer] = value }
         new(hash)
+      end
+
+      def self.new(ctx : YAML::ParseContext, node : YAML::Nodes::Node)
+        node.raise "Expected mapping, not #{node.class}" unless node.is_a?(YAML::Nodes::Mapping)
+        YAML::Schema::Core.each(node) do |key, value|
+          value_class = value.is_a?(YAML::Nodes::Mapping) ? self : Secret
+          yield Identifier.new(ctx, key), value_class.new(ctx, value)
+        end
       end
     end
 
@@ -66,7 +66,7 @@ module Cryogen
       File.open(vault_file, "r") { |f| new(Entry.from_yaml(f)) }
     end
 
-    def initialize(@contents = Entry.empty)
+    def initialize(@contents : Entry = Entry.empty)
     end
 
     def save!(vault_file : String)
