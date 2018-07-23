@@ -134,6 +134,16 @@ This output is suitable for evaluation by `bash` directly, as in `eval
 $(cryogen export)`. Alternatively, `cryogen export --no-subprocess` omits the
 `export` prefix.
 
+The `--only` flag allows exclusion of prefixes. For example, given the by-stage file above, one might use:
+
+```bash
+$ cryogen export --only=production
+
+export GOOGLE_CLIENT_ID=my_real_client_id
+export PRODUCTION_GOOGLE_CLIENT_SECRET=my_real_client_secret
+export FACEBOOK_API_KEY=my_real_api_key
+```
+
 ### Locking and Unlocking
 
 Since your key should be ignored by your VCS, leaving a vault unlocked on your
