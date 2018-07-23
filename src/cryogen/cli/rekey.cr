@@ -13,7 +13,7 @@ module Cryogen
         current_key = obtain_key!
         vault = LockedVault.load(Cryogen::VAULT_FILE).unlock!(current_key)
 
-        puts "Are you sure you want to change the vault key? This will invalidate the previous key!".colorize(:yellow)
+        warn "Are you sure you want to change the vault key? This will invalidate the previous key!"
         raise Error::OperationCancelled.new unless "Y" == prompt("Proceed? [Y/n]:")
 
         key = Key.generate
@@ -22,11 +22,11 @@ module Cryogen
 
         puts "Your new key is:"
         puts key.to_base64.colorize.mode(:underline)
-        puts "Save this key securely! Without it, you will NOT be able to access or edit your vault.".colorize(:yellow).mode(:bold)
+        warn "Save this key securely! Without it, you will NOT be able to access or edit your vault.", important: true
 
         if prompt("Save new key to file now? [Y/n]") == "Y"
           key.save!(Cryogen::KEY_FILE)
-          puts "Vault unlocked! MAKE SURE that you add #{Cryogen::KEY_FILE} to your .gitignore (or equivalent) to avoid mishaps.".colorize(:yellow)
+          warn "Vault unlocked! MAKE SURE that you add #{Cryogen::KEY_FILE} to your .gitignore (or equivalent) to avoid mishaps."
         else
           puts "Use the `cryogen unlock` command to unlock your chest for editing, or pass $CRYOGEN_KEY to avoid persisting to disk."
         end

@@ -12,7 +12,7 @@ module Cryogen
       def run
         require_unlocked_vault!
         File.delete(Cryogen::KEY_FILE)
-        puts "Key deleted! Use `cryogen unlock` to unlock again, or set $CRYOGEN_KEY to avoid persisting sensitive data.".colorize(:green)
+        success "Key deleted! Use `cryogen unlock` to unlock again, or set $CRYOGEN_KEY to avoid persisting sensitive data."
       end
     end
   end

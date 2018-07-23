@@ -24,7 +24,7 @@ module Cryogen
         begin
           edit_file(tempfile.path)
           UnlockedVault.load(tempfile.path).lock!(key).save!(Cryogen::VAULT_FILE)
-          puts "Vault updated! Make sure to commit any changes to #{Cryogen::VAULT_FILE}"
+          success "Vault updated! Make sure to commit any changes to #{Cryogen::VAULT_FILE}"
         ensure
           tempfile.delete
         end

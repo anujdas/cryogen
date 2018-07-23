@@ -43,12 +43,28 @@ module Cryogen
         raise Error::EditorNotSet.new unless ENV["EDITOR"]?
       end
 
-      def prompt(prompt_str : String, echo : Bool = true) : String
+      def prompt(prompt_str : String, important : Bool = false, echo : Bool = true) : String
         require_tty!
+
+        prompt_str = prompt_str.colorize(:yellow).bold if important
         print "#{prompt_str} "
+
         raw_input = echo ? gets : STDIN.noecho(&.gets)
         puts unless echo # this is silly
         raw_input.to_s.chomp
+      end
+
+      def success(str : String)
+        puts str.colorize(:green)
+      end
+
+      def warn(str : String, important : Bool = false)
+        yellow_str = str.colorize(:yellow)
+        puts important ? yellow_str.bold : yellow_str
+      end
+
+      def error(str : String)
+        puts str.colorize(:red)
       end
     end
   end

@@ -17,7 +17,7 @@ module Cryogen
         LockedVault.load(Cryogen::VAULT_FILE).unlock!(key) # test decryption
         key.save!(Cryogen::KEY_FILE)
 
-        puts "Key persisted! Add #{Cryogen::KEY_FILE} to your .gitignore (or equivalent) to avoid mishaps.".colorize(:green)
+        success "Key persisted! Add #{Cryogen::KEY_FILE} to your .gitignore (or equivalent) to avoid mishaps."
       end
     end
   end
