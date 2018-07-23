@@ -5,64 +5,68 @@ require "./crypto"
 require "./error"
 
 module Cryogen
-  alias Prefix = String
-  alias Value = String
+  abstract struct Vault
+    struct Entry
+      alias Identifier = String
+      alias Value = String
 
-  record Entry, contents : Hash(Prefix, Entry | Value) do
-    def self.from_yaml(string_or_io) : self
-      parse_yaml(YAML.parse(string_or_io))
-    end
-
-    delegate to_yaml, to: contents
-
-    def decrypt(key : Key) : self
-      hash = contents.each_with_object({} of Prefix => Entry | Value) do |(prefix, val), h|
-        h[prefix] = val.is_a?(Entry) ? val.decrypt(key) : Crypto.verify_and_decrypt(val, key)
+      def self.from_yaml(string_or_io) : self
+        parse_yaml(YAML.parse(string_or_io))
       end
-      self.class.new(hash)
-    end
 
-    def encrypt(key : Key) : self
-      hash = contents.each_with_object({} of Prefix => Entry | Value) do |(prefix, val), h|
-        h[prefix] = val.is_a?(Entry) ? val.encrypt(key) : Crypto.encrypt_and_sign(val, key)
+      def self.empty : self
+        new({} of Identifier => self | Value)
       end
-      self.class.new(hash)
-    end
 
-    def to_env(outer_prefix : String? = nil) : Hash(String, String)
-      contents.each_with_object({} of String => String) do |(inner_prefix, val), vars|
-        prefix = [outer_prefix, inner_prefix].compact.join("_")
-        vars.merge!(val.is_a?(Entry) ? val.to_env(prefix) : { prefix.upcase => val })
+      delegate to_yaml, to: @value
+
+      def initialize(@value : Hash(Identifier, Entry | Value))
+      end
+
+      def decrypt(key : Key) : self
+        hash = @value.each_with_object({} of Identifier => Entry | Value) do |(prefix, val), h|
+          h[prefix] = val.is_a?(Entry) ? val.decrypt(key) : Crypto.verify_and_decrypt(val, key)
+        end
+        self.class.new(hash)
+      end
+
+      def encrypt(key : Key) : self
+        hash = @value.each_with_object({} of Identifier => Entry | Value) do |(prefix, val), h|
+          h[prefix] = val.is_a?(Entry) ? val.encrypt(key) : Crypto.encrypt_and_sign(val, key)
+        end
+        self.class.new(hash)
+      end
+
+      def to_env(prefix : String? = nil) : Hash(String, String)
+        @value.each_with_object({} of String => String) do |(identifier, val), vars|
+          qualified_id = [prefix, identifier].compact.join("_")
+          vars.merge!(val.is_a?(Entry) ? val.to_env(qualified_id) : { qualified_id.upcase => val })
+        end
+      end
+
+      private def self.parse_yaml(yaml : YAML::Any) : self
+        raise Error::VaultInvalid.new unless yaml.as_h?
+        hash = yaml.as_h.each_with_object({} of Identifier => Entry | Value) do |(key, val), h|
+          raise Error::VaultInvalid.new unless key.as_s?
+          h[key.as_s] = if val.as_h?
+                          parse_yaml(val)
+                        elsif val.as_s?
+                          val.as_s
+                        else
+                          raise Error::VaultInvalid.new
+                        end
+        end
+        new(hash)
       end
     end
 
-    private def self.parse_yaml(yaml : YAML::Any) : self
-      raise Error::VaultInvalid.new unless yaml.as_h?
-      hash = yaml.as_h.each_with_object({} of Prefix => Entry | Value) do |(key, val), h|
-        h[key.as_s] = if val.as_h?
-                        parse_yaml(val)
-                      elsif val.as_s?
-                        val.as_s
-                      else
-                        raise Error::VaultInvalid.new
-                      end
-      end
-      new(hash)
-    end
-  end
-
-  class LockedVault
     delegate to_yaml, to: @contents
 
     def self.load(vault_file : String) : self
       File.open(vault_file, "r") { |f| new(Entry.from_yaml(f)) }
     end
 
-    def initialize(@contents = Entry.new({} of Prefix => Entry | Value))
-    end
-
-    def unlock!(key : Key) : UnlockedVault
-      UnlockedVault.new(@contents.decrypt(key))
+    def initialize(@contents = Entry.empty)
     end
 
     def save!(vault_file : String)
@@ -70,22 +74,17 @@ module Cryogen
     end
   end
 
-  class UnlockedVault
-    delegate to_yaml, to_env, to: @contents
-
-    def self.load(vault_file : String) : self
-      File.open(vault_file, "r") { |f| new(Entry.from_yaml(f)) }
+  struct LockedVault < Vault
+    def unlock!(key : Key) : UnlockedVault
+      UnlockedVault.new(@contents.decrypt(key))
     end
+  end
 
-    def initialize(@contents = Entry.new({} of Prefix => Entry | Value))
-    end
+  struct UnlockedVault < Vault
+    delegate to_env, to: @contents
 
     def lock!(key : Key) : LockedVault
       LockedVault.new(@contents.encrypt(key))
-    end
-
-    def save!(vault_file : String)
-      File.open(vault_file, "w") { |f| to_yaml(f) }
     end
   end
 end
