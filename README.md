@@ -1,5 +1,7 @@
 # cryogen
 
+[![Build Status](https://travis-ci.org/anujdas/cryogen.cr.svg?branch=master)](https://travis-ci.org/anujdas/cryogen.cr)
+
 `cryogen` is a tool for managing encrypted secrets in a repository. It allows
 versioning of secrets alongside code within an existing VCS workflow (`git`,
 etc.).  `cryogen` is heavily inspired by the Ruby tool
