@@ -2,7 +2,6 @@ require "yaml"
 
 require "./key"
 require "./crypto"
-require "./error"
 
 module Cryogen
   struct VaultEntry
@@ -48,7 +47,10 @@ module Cryogen
       ctx.read_alias(node, self) { |obj| return obj }
       hash = ValueType.new
       ctx.record_anchor(node, hash)
-      new(ctx, node) { |identifer, value| hash[identifer] = value }
+      new(ctx, node) do |identifier, value|
+        node.raise "Duplicate mapping for #{identifier} found" if hash.has_key?(identifier)
+        hash[identifier] = value
+      end
       new(hash)
     end
 

@@ -1,5 +1,6 @@
 require "file"
 
+require "./error"
 require "./key"
 require "./vault_entry"
 
@@ -7,6 +8,8 @@ module Cryogen
   abstract struct Vault
     def self.load(vault_file : String) : self
       File.open(vault_file, "r") { |f| new(VaultEntry.from_yaml(f)) }
+    rescue e : YAML::ParseException
+      raise Error::VaultInvalid.new(e)
     end
 
     delegate to_yaml, to: @contents

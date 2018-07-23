@@ -1,4 +1,5 @@
-require "./key"
+require "openssl/cipher"
+require "yaml"
 
 module Cryogen
   class Error < Exception
@@ -45,8 +46,8 @@ module Cryogen
     end
 
     class VaultInvalid < Error
-      def initialize
-        super "Invalid vault! Only strings are supported as keys and values, and the top level must be a mapping"
+      def initialize(yaml_exc : YAML::ParseException)
+        super "Invalid vault! Keys and values must be strings. #{yaml_exc.message}"
       end
     end
 

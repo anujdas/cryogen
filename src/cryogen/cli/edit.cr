@@ -2,6 +2,7 @@ require "admiral"
 require "tempfile"
 
 require "./helpers"
+require "../error"
 
 module Cryogen
   module CLI
@@ -22,17 +23,21 @@ module Cryogen
         end
 
         begin
-          edit_file(tempfile.path)
-          UnlockedVault.load(tempfile.path).lock!(key).save!(Cryogen::VAULT_FILE)
+          vault = edit_until_valid(tempfile.path)
+          vault.lock!(key).save!(Cryogen::VAULT_FILE)
           success "Vault updated! Make sure to commit any changes to #{Cryogen::VAULT_FILE}"
         ensure
           tempfile.delete
         end
       end
 
-      private def edit_file(filename : String)
-        unless system(ENV["EDITOR"], [filename])
-          raise Error::EditorFailed.new 
+      private def edit_until_valid(filename : String) : UnlockedVault
+        loop do
+          raise Error::EditorFailed.new unless system(ENV["EDITOR"], [filename])
+          break UnlockedVault.load(filename)
+        rescue e : Error::VaultInvalid
+          error e.message
+          raise e unless "Y" == prompt("Continue editing? Otherwise, changes will be discarded. [Y/n]:")
         end
       end
     end
