@@ -166,6 +166,18 @@ $ CRYOGEN_KEY=my_key cryogen export
 # export SECRET=value
 ```
 
+## Technical Details
+
+`cryogen` uses OpenSSL bindings to encrypt each individual secret using
+AES-256-CBC. The resulting ciphertext is then signed using HMAC-SHA256. The IV,
+ciphertext, and signature are stored together in the encrypted vault in a
+structure matching the original unencrypted vault layout.
+
+The secret key is generated from a cryptographically secure random byte source.
+256 bits are used for each of encryption and signing. The concatenated 512 bits
+form the `.cryogen/secret.key` file, and a base64-encoded version is provided
+to the user as a copy/paste-able key.
+
 ## Development
 
 `cryogen` is compiled and statically typed. Compile it by running `make`, which
