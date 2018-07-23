@@ -21,7 +21,7 @@ module Cryogen
 
         puts "Vault created! Commit #{Cryogen::VAULT_FILE} to version control. Use `cryogen edit` to add values.".colorize(:green)
         puts "Your key is:"
-        puts key.to_base64.colorize(:red).mode(:underline)
+        puts key.to_base64.colorize.mode(:underline)
         puts "Save this key securely! Without it, you will NOT be able to access or edit your vault.".colorize(:yellow).mode(:bold)
 
         if prompt("Save key to file now? [Y/n]") == "Y"

@@ -16,6 +16,7 @@ module Cryogen
       register_sub_command edit : CLI::Edit, description: "Opens the vault in $EDITOR"
       register_sub_command unlock : CLI::Unlock, description: "Unlock the vault"
       register_sub_command lock : CLI::Lock, description: "Lock the vault"
+      register_sub_command rekey : CLI::Rekey, description: "Rotate the vault key"
 
       define_help description: "A tool for managing secrets"
       define_version VERSION
