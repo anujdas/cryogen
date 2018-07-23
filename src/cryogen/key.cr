@@ -18,6 +18,8 @@ module Cryogen
 
     def self.from_base64(stringified_key : String) : self
       new(Base64.decode(stringified_key))
+    rescue Base64::Error
+      raise Error::KeyInvalid.new
     end
 
     def self.load(key_file : String) : self
