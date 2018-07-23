@@ -7,11 +7,13 @@ require "./key"
 
 module Cryogen
   module Crypto
+    extend self
+
     CIPHER_MODE = "AES-256-CBC"
     SIG_MODE = :sha256
     SEPARATOR = '$'
 
-    def self.encrypt_and_sign(value : String, key : Key) : String
+    def encrypt_and_sign(value : String, key : Key) : String
       # set up cipher in encrypt mode using weird openssl-isms
       cipher = OpenSSL::Cipher.new(CIPHER_MODE)
       cipher.encrypt
@@ -28,7 +30,7 @@ module Cryogen
       [iv, data, sig].map { |s| Base64.strict_encode(s) }.join(SEPARATOR)
     end
 
-    def self.verify_and_decrypt(encrypted_value : String, key : Key) : String
+    def verify_and_decrypt(encrypted_value : String, key : Key) : String
       # parse "iv$data$sig"
       iv, data, sig = encrypted_value.split(SEPARATOR).map { |s| Base64.decode(s) }
         
@@ -48,7 +50,7 @@ module Cryogen
       raise Error::DecryptionError.new(e)
     end
 
-    private def self.concat_bytes(*bytestrings : Bytes) : Bytes
+    private def concat_bytes(*bytestrings : Bytes) : Bytes
       io = IO::Memory.new
       bytestrings.each { |bs| io.write(bs) }
       io.to_slice
