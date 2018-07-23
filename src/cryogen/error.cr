@@ -4,7 +4,7 @@ module Cryogen
   class Error < Exception
     class KeyInvalid < Error
       def initialize
-        super "Key must be exactly #{Key::KEY_BYTES * 2} bytes in length"
+        super "The provided key was invalid; check it and try again"
       end
     end
 
@@ -40,7 +40,7 @@ module Cryogen
 
     class KeyNotFound < Error
       def initialize
-        super "Key not found -- did you unlock the vault or pass CRYOGEN_PASSWORD?"
+        super "Key not found -- did you unlock the vault or pass CRYOGEN_KEY?"
       end
     end
 

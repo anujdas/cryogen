@@ -1,37 +1,47 @@
-require "crypto/bcrypt/password"
+require "base64"
 require "file"
-require "openssl"
+require "random/secure"
 
 require "./error"
 
 module Cryogen
   class Key
-    KEY_BYTES = 32 # bytes == 256 bits for each of cipher and signing
+    CIPHER_KEY_BYTES = 32 # == 256 bits for AES-256-CBC (which is overkill)
+    SIGNING_KEY_BYTES = 32 # == 256 bits for HMAC-SHA256 (which is also overkill)
+    KEY_BYTES = CIPHER_KEY_BYTES + SIGNING_KEY_BYTES
 
-    # uses bcrypt to stretch password, then hashes that into 512 bits of key data
-    def self.from_password(password : String) : Key
-      derived_key = ::Crypto::Bcrypt::Password.create(password).digest
-      digest = OpenSSL::Digest.new("SHA512") # we'll need 256 + 256 bits
-      digest.update(derived_key)
-      new(digest.digest)
+    def self.generate : self
+      key_material = Bytes.new(KEY_BYTES)
+      Random::Secure.random_bytes(key_material)
+      new(key_material)
     end
 
-    def self.load(key_file : String) : Key
-      slice = Bytes.new(KEY_BYTES * 2)
-      File.open(key_file, "rb") { |f| f.read(slice) }
-      new(slice)
+    def self.from_base64(stringified_key : String) : self
+      new(Base64.decode(stringified_key))
+    end
+
+    def self.load(key_file : String) : self
+      key_material = Bytes.new(KEY_BYTES)
+      File.open(key_file, "rb") { |f| f.read(key_material) }
+      new(key_material)
     end
 
     ###
 
     getter cipher_key : Bytes, signing_key : Bytes
 
-    # Given a 512-bit key, splits it into a 256-bit encryption key and a
-    # 256-bit signing key
     def initialize(key_material : Bytes)
-      raise Error::KeyInvalid.new unless key_material.size == KEY_BYTES * 2
-      @cipher_key = key_material[0, KEY_BYTES]
-      @signing_key = key_material[KEY_BYTES, KEY_BYTES]
+      raise Error::KeyInvalid.new unless key_material.size == KEY_BYTES
+      @cipher_key = key_material[0, CIPHER_KEY_BYTES]
+      @signing_key = key_material[CIPHER_KEY_BYTES, SIGNING_KEY_BYTES]
+    end
+
+    def to_base64 : String
+      io = IO::Memory.new.tap do |io|
+        io.write(@cipher_key)
+        io.write(@signing_key)
+      end
+      Base64.strict_encode(io)
     end
 
     def save!(key_file : String)

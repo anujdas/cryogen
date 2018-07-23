@@ -7,7 +7,7 @@ module Cryogen
     class Unlock < Admiral::Command
       include Helpers
 
-      define_help description: "Saves the vault key for passwordless use"
+      define_help description: "Saves the vault key for non-interactive use"
 
       def run
         require_tty!

@@ -22,13 +22,13 @@ module Cryogen
       end
 
       def obtain_key! : Key
-        if ENV["CRYOGEN_PASSWORD"]?
-          Key.from_password(ENV["CRYOGEN_PASSWORD"]) 
+        if ENV["CRYOGEN_KEY"]?
+          Key.from_base64(ENV["CRYOGEN_KEY"]) 
         elsif File.exists?(Cryogen::KEY_FILE)
           Key.load(Cryogen::KEY_FILE)
         elsif STDIN.tty?
-          password = prompt("Enter the password and hit [Enter]:", echo: false)
-          Key.from_password(password)
+          key = prompt("Enter the key and hit [Return]:", echo: false)
+          Key.from_base64(key)
         else
           raise Error::KeyNotFound.new
         end

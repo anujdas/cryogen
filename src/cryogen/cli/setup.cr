@@ -14,15 +14,22 @@ module Cryogen
         require_tty!
         handle_existing_vault!
 
-        password = prompt("Enter a password (the encryption key will be derived from it, so make it secure and save it!):", echo: false)
-        key = Key.from_password(password)
-
         Dir.mkdir_p(Cryogen::BASE_DIR) unless Dir.exists?(Cryogen::BASE_DIR)
+
+        key = Key.generate
         UnlockedVault.new.lock!(key).save!(Cryogen::VAULT_FILE)
-        key.save!(Cryogen::KEY_FILE)
 
         puts "Vault created! Commit #{Cryogen::VAULT_FILE} to version control. Use `cryogen edit` to add values.".colorize(:green)
-        puts "Key persisted! Add #{Cryogen::KEY_FILE} to your .gitignore (or equivalent) to avoid mishaps.".colorize(:yellow)
+        puts "Your key is:"
+        puts key.to_base64.colorize(:red).mode(:underline)
+        puts "Save this key securely! Without it, you will NOT be able to access or edit your vault.".colorize(:yellow).mode(:bold)
+
+        if prompt("Save key to file now? [Y/n]") == "Y"
+          key.save!(Cryogen::KEY_FILE)
+          puts "Vault unlocked! MAKE SURE that you add #{Cryogen::KEY_FILE} to your .gitignore (or equivalent) to avoid mishaps.".colorize(:yellow)
+        else
+          puts "Use the `cryogen unlock` command to unlock your chest for editing, or pass $CRYOGEN_KEY to avoid persisting to disk."
+        end
       end
 
       private def handle_existing_vault!
