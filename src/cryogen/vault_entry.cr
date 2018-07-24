@@ -37,11 +37,11 @@ module Cryogen
     def to_env(namespace : String? = nil) : Hash(String, String)
       @value.each_with_object({} of String => String) do |(name, val), vars|
         full_name = [namespace, name].compact.join("_")
-        vars.merge!(val.is_a?(Secret) ? { full_name.upcase => val } : val.to_env(full_name))
+        vars.merge!(val.is_a?(Secret) ? {full_name.upcase => val} : val.to_env(full_name))
       end
     end
 
-    ### YAML parsing helpers (providing detailed format validation)
+    # YAML parsing helpers (providing detailed format validation)
 
     def self.new(ctx : YAML::ParseContext, node : YAML::Nodes::Node)
       ctx.read_alias(node, self) { |obj| return obj }

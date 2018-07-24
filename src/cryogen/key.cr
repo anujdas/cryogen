@@ -6,9 +6,9 @@ require "./error"
 
 module Cryogen
   class Key
-    CIPHER_KEY_BYTES = 32 # == 256 bits for AES-256-CBC (which is overkill)
+    CIPHER_KEY_BYTES  = 32 # == 256 bits for AES-256-CBC (which is overkill)
     SIGNING_KEY_BYTES = 32 # == 256 bits for HMAC-SHA256 (which is also overkill)
-    KEY_BYTES = CIPHER_KEY_BYTES + SIGNING_KEY_BYTES
+    KEY_BYTES         = CIPHER_KEY_BYTES + SIGNING_KEY_BYTES
 
     def self.generate : self
       key_material = Bytes.new(KEY_BYTES)

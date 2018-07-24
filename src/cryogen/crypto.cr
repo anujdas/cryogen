@@ -10,8 +10,8 @@ module Cryogen
     extend self
 
     CIPHER_MODE = "AES-256-CBC"
-    SIG_MODE = :sha256
-    SEPARATOR = '$'
+    SIG_MODE    = :sha256
+    SEPARATOR   = '$'
 
     def encrypt_and_sign(value : String, key : Key) : String
       # set up cipher in encrypt mode using weird openssl-isms
@@ -33,7 +33,7 @@ module Cryogen
     def verify_and_decrypt(encrypted_value : String, key : Key) : String
       # parse "iv$data$sig"
       iv, data, sig = encrypted_value.split(SEPARATOR).map { |s| Base64.decode(s) }
-        
+
       # verify HMAC-256 before decoding
       calculated_sig = OpenSSL::HMAC.digest(SIG_MODE, key.signing_key, concat_bytes(iv, data))
       raise Error::SignatureInvalid.new unless calculated_sig == sig

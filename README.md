@@ -182,8 +182,12 @@ to the user as a copy/paste-able key.
 
 ## Development
 
-`cryogen` is compiled and statically typed. Compile it by running `make`, which
-will install dependencies as well.
+`cryogen` is compiled and statically typed.
+- `make` will install dependencies and build a binary
+- `make build-release` will do the same, but will emit a release binary
+- `make clean` will remove build artifacts
+- `make test` will run specs
+- `make format` will format code according to the Crystal style guide
 
 ## Contributing
 

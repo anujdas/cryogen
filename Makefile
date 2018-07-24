@@ -7,6 +7,8 @@ build:
 	$(SHARDS_BIN) build $(CRFLAGS)
 build-release:
 	$(SHARDS_BIN) build --release $(CRFLAGS)
+format:
+	$(CRYSTAL_BIN) tool format
 clean:
 	rm -f ./bin/cryogen ./bin/cryogen.dwarf
 test: build

@@ -23,7 +23,7 @@ module Cryogen
 
       def obtain_key! : Key
         if ENV["CRYOGEN_KEY"]?
-          Key.from_base64(ENV["CRYOGEN_KEY"]) 
+          Key.from_base64(ENV["CRYOGEN_KEY"])
         elsif File.exists?(Cryogen::KEY_FILE)
           Key.load(Cryogen::KEY_FILE)
         elsif STDIN.tty?
