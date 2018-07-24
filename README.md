@@ -15,7 +15,12 @@ secrets from environment variables.
 
 ## Table of Contents
 
+* [Quickstart](#quickstart)
 * [Installation](#installation)
+   * [MacOS](#macos)
+   * [Linux](#linux)
+   * [Docker](#docker)
+   * [From source](#from-source)
 * [Usage](#usage)
    * [First-time Setup](#first-time-setup)
    * [Adding/Editing the vault](#addingediting-the-vault)
@@ -26,7 +31,48 @@ secrets from environment variables.
 * [Contributing](#contributing)
 * [Contributors](#contributors)
 
+## Quickstart
+
+```bash
+# install MacOS binary to /usr/local/bin/cryogen
+$ curl -L https://github.com/anujdas/cryogen/releases/download/v1.0.0/cryogen-darwin-x64.tgz | tar xzC /usr/local/bin
+
+$ cryogen setup  # crete new vault -- make sure to copy and save key!
+$ echo ".cryogen/secret.key" >> .gitignore  # ignore key
+$ git add .cryogen/vault.yml  # track vault in VCS
+
+$ EDITOR=vim cryogen edit  # edit vault
+
+$ eval $(cryogen export)  # set environment variables from vault
+```
+
 ## Installation
+
+The latest binaries for Linux and MacOS, as well as source tarballs, can be
+found on the [Github releases
+page](https://github.com/anujdas/cryogen/releases/latest).
+
+### MacOS
+
+Download the latest darwin-x64 tarball and extract. Copy the enclosed binary to
+a location in your path.  For instance:
+```bash
+# install MacOS amd64 binary to /usr/local/bin/cryogen
+$ curl -L https://github.com/anujdas/cryogen/releases/download/v1.0.0/cryogen-darwin-x64.tgz | tar xzC /usr/local/bin
+```
+
+### Linux
+
+Download the latest linux-x64 tarball and extract. Copy the enclosed binary to
+a location in your path.  For instance:
+```bash
+# install Linux amd64 binary to /usr/local/bin/cryogen
+$ curl -L https://github.com/anujdas/cryogen/releases/download/v1.0.0/cryogen-linux-x64.tgz | tar xzC /usr/local/bin
+```
+If this does not work on your system due to missing libraries, try [building
+from source](#from-source).
+
+### From source
 
 `cryogen` is written in [Crystal](https://crystal-lang.org/), a
 statically-typed, null-safe, compiled language with syntax inspired by Ruby.
@@ -42,6 +88,15 @@ $ make build-release
 The resulting binary (at `bin/cryogen`) can be installed via the `make install`
 command. You may need to add `/usr/local/bin` to your `$PATH` in order to make
 the command available everywhere.
+
+### Docker
+
+`cryogen` comes with a `Dockerfile` for self-contained execution.
+```bash
+$ docker build -t anujdas/cryogen .
+$ cd path/to/target/repo
+$ docker run -v `pwd`/.cryogen:/workspace/.cryogen -ti anujdas/cryogen:latest setup # or other commands
+```
 
 ## Usage
 
