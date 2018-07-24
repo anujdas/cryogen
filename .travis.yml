@@ -2,4 +2,4 @@ language: crystal
 crystal:
   - latest
 script:
-  - make
+  - make test
