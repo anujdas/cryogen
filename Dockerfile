@@ -1,6 +1,8 @@
-FROM crystallang/crystal:0.25.1
+FROM alpine:3.8
+MAINTAINER Anuj Das "anujdas@gmail.com"
 
-ADD . /workspace
-WORKDIR /workspace
-RUN make build-release
-ENTRYPOINT ["./bin/cryogen"]
+ENV EDITOR=nano
+RUN apk add --no-cache $EDITOR
+
+COPY bin/cryogen /cryogen
+ENTRYPOINT ["/cryogen"]

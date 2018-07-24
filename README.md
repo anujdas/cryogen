@@ -58,19 +58,39 @@ Download the latest darwin-x64 tarball and extract. Copy the enclosed binary to
 a location in your path.  For instance:
 ```bash
 # install MacOS amd64 binary to /usr/local/bin/cryogen
-$ curl -L https://github.com/anujdas/cryogen/releases/download/v1.0.0/cryogen-darwin-x64.tgz | tar xzC /usr/local/bin
+$ curl -L https://github.com/anujdas/cryogen/releases/download/v1.1.0/cryogen-darwin-x64.tgz | tar xzC /usr/local/bin
 ```
 
 ### Linux
 
 Download the latest linux-x64 tarball and extract. Copy the enclosed binary to
-a location in your path.  For instance:
+a location in your path. For instance:
 ```bash
 # install Linux amd64 binary to /usr/local/bin/cryogen
-$ curl -L https://github.com/anujdas/cryogen/releases/download/v1.0.0/cryogen-linux-x64.tgz | tar xzC /usr/local/bin
+$ curl -L https://github.com/anujdas/cryogen/releases/download/v1.1.0/cryogen-linux-x64.tgz | tar xzC /usr/local/bin
 ```
-If this does not work on your system due to missing libraries, try [building
-from source](#from-source).
+The linux binary is compiled with static links and should be dependency-free,
+but if it does not work on your system, try [building from
+source](#from-source).
+
+### Docker
+
+`cryogen` comes in a Docker image that can be used as though it were a local
+installation. For example:
+```bash
+$ cd path/to/target/repo
+$ docker run -v `pwd`/.cryogen:/.cryogen -ti anujdas/cryogen:latest setup # or other commands
+```
+
+Alternatively, you can build your own:
+```bash
+$ make build-docker
+$ cd path/to/target/repo
+$ docker run -v `pwd`/.cryogen:/.cryogen -ti cryogen setup
+```
+
+Note the bind-mount of `.cryogen`, which is necessary to expose the chest and
+key to the image. The image as shipped uses `nano` as its `$EDITOR`.
 
 ### From source
 
@@ -89,15 +109,6 @@ The resulting binary (at `bin/cryogen`) can be installed via the `make install`
 command. You may need to add `/usr/local/bin` to your `$PATH` in order to make
 the command available everywhere.
 
-### Docker
-
-`cryogen` comes with a `Dockerfile` for self-contained execution.
-```bash
-$ docker build -t anujdas/cryogen .
-$ cd path/to/target/repo
-$ docker run -v `pwd`/.cryogen:/workspace/.cryogen -ti anujdas/cryogen:latest setup # or other commands
-```
-
 ## Usage
 
 `cryogen` provides built-in help that can be accessed via the `--help` flag on
@@ -106,9 +117,8 @@ displayed:
 
 ```bash
 $ cryogen --help
-
 Usage:
-  bin/cryogen [flags...] [arg...]
+  cryogen [flags...] [arg...]
 
 A tool for managing secrets
 
@@ -117,12 +127,13 @@ Flags:
   --version  # Displays the version of the current application.
 
 Subcommands:
-  edit       # Opens the vault in $EDITOR
+  edit       # Open the vault in $EDITOR
   export     # Print decrypted vault contents in shell `eval`-able ENV format
   lock       # Lock the vault
   rekey      # Rotate the vault key
   setup      # Initialize a vault in this directory
   show       # Show decrypted contents of vault
+  show_key   # Display vault decryption key
   unlock     # Unlock the vault
 ```
 
@@ -252,7 +263,9 @@ to the user as a copy/paste-able key.
 
 `cryogen` is compiled and statically typed.
 - `make` will install dependencies and build a binary
-- `make build-release` will do the same, but will emit a release binary
+- `make build-release` will do the same but will emit a release binary
+- `make install` will install the binary
+- `make build-docker` will build a statically-linked Linux binary and a Docker image
 - `make clean` will remove build artifacts
 - `make test` will run specs
 - `make format` will format code according to the Crystal style guide
@@ -261,6 +274,7 @@ to the user as a copy/paste-able key.
 
 1. Fork it (<https://github.com/anujdas/cryogen/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Make sure tests pass and code is formatted (`make test format`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
