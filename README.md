@@ -13,6 +13,19 @@ language.
 values and follows the [12-factor methodology](https://12factor.net/), reading
 secrets from environment variables.
 
+## Table of Contents
+
+* [Installation](#installation)
+* [Usage](#usage)
+   * [First-time Setup](#first-time-setup)
+   * [Adding/Editing the vault](#addingediting-the-vault)
+   * [Using Secrets in your Application](#using-secrets-in-your-application)
+   * [Locking and Unlocking](#locking-and-unlocking)
+* [Technical Details](#technical-details)
+* [Development](#development)
+* [Contributing](#contributing)
+* [Contributors](#contributors)
+
 ## Installation
 
 `cryogen` is written in [Crystal](https://crystal-lang.org/), a
