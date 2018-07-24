@@ -35,9 +35,9 @@ secrets from environment variables.
 
 ```bash
 # install MacOS binary to /usr/local/bin/cryogen
-$ curl -L https://github.com/anujdas/cryogen/releases/download/v1.0.0/cryogen-darwin-x64.tgz | tar xzC /usr/local/bin
+$ curl -L https://github.com/anujdas/cryogen/releases/download/v1.1.0/cryogen-darwin-x64.tgz | tar xzC /usr/local/bin
 
-$ cryogen setup  # crete new vault -- make sure to copy and save key!
+$ cryogen setup  # create new vault -- make sure to copy and save key!
 $ echo ".cryogen/secret.key" >> .gitignore  # ignore key
 $ git add .cryogen/vault.yml  # track vault in VCS
 
