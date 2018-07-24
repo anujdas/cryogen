@@ -11,6 +11,7 @@ module Cryogen
     class Main < Admiral::Command
       register_sub_command setup : CLI::Setup, description: "Initialize a vault in this directory"
       register_sub_command show : CLI::Show, description: "Show decrypted contents of vault"
+      register_sub_command show_key : CLI::ShowKey, description: "Display vault decryption key"
       register_sub_command export : CLI::Export,
         description: "Print decrypted vault contents in shell `eval`-able ENV format"
       register_sub_command edit : CLI::Edit, description: "Open the vault in $EDITOR"
