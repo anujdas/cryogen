@@ -16,10 +16,10 @@ clean:
 bin/cryogen: $(SOURCES)
 	@$(SHARDS_BIN) build $(CRFLAGS)
 
-build-release:
+build-release: $(SOURCES)
 	@$(SHARDS_BIN) build --release $(CRFLAGS)
 
-build-docker:
+build-docker: $(SOURCES)
 	@docker run --rm -v `pwd`:/workspace -it crystallang/crystal:latest /workspace/script/docker-build.sh
 	@docker build -t cryogen .
 
@@ -29,6 +29,14 @@ install: build-release
 
 uninstall:
 	@rm -f "$(BINDIR)/cryogen"
+
+release:
+	@docker run --rm -v `pwd`:/workspace -it crystallang/crystal:latest /workspace/script/docker-build.sh
+	@docker build -t cryogen .
+	@tar czvf bin/cryogen-linux-x64.tgz -C bin cryogen
+	@rm -f bin/cryogen bin/cryogen.dwarf
+	@$(SHARDS_BIN) build --release $(CRFLAGS)
+	@tar czvf bin/cryogen-darwin-x64.tgz -C bin cryogen
 
 test: bin/cryogen
 	@$(CRYSTAL_BIN) spec
