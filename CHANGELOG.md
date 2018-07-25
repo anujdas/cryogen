@@ -1,6 +1,6 @@
 # Cryogen Changelog
 
-## Unreleased
+## 1.2.0
 
 * Make multiline values work correctly when exported
 
