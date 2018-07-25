@@ -9,9 +9,10 @@ etc.).  `cryogen` is heavily inspired by the Ruby tool
 with no external dependencies, greatly simplifying use with projects in any
 language.
 
-`cryogen` shines when working with a team on a project that requires secret
-values and follows the [12-factor methodology](https://12factor.net/), reading
-secrets from environment variables.
+`cryogen` shines when working with a team on a version-controlled project that
+requires secret values and follows the [12-factor
+methodology](https://12factor.net/), reading secrets from environment
+variables. It aims for simplicity in setup and use.
 
 ## Table of Contents
 
@@ -23,7 +24,7 @@ secrets from environment variables.
    * [From source](#from-source)
 * [Usage](#usage)
    * [First-time Setup](#first-time-setup)
-   * [Adding/Editing the vault](#addingediting-the-vault)
+   * [Editing the vault](#editing-the-vault)
    * [Using Secrets in your Application](#using-secrets-in-your-application)
    * [Locking and Unlocking](#locking-and-unlocking)
 * [Technical Details](#technical-details)
@@ -38,12 +39,14 @@ secrets from environment variables.
 $ curl -L https://github.com/anujdas/cryogen/releases/download/v1.1.0/cryogen-darwin-x64.tgz | tar xzC /usr/local/bin
 
 $ cryogen setup  # create new vault -- make sure to copy and save key!
-$ echo ".cryogen/secret.key" >> .gitignore  # ignore key
+$ echo "/.cryogen/secret.key" >> .gitignore  # ignore key
 $ git add .cryogen/vault.yml  # track vault in VCS
 
 $ EDITOR=vim cryogen edit  # edit vault
 
-$ eval $(cryogen export)  # set environment variables from vault
+$ . /dev/stdin <<< "$(cryogen export)"  # set env variables from vault, working around bash 3 on macos
+# or
+$ . <(cryogen export)  # works on bash 4, zsh, etc.
 ```
 
 ## Installation
@@ -69,13 +72,13 @@ a location in your path. For instance:
 # install Linux amd64 binary to /usr/local/bin/cryogen
 $ curl -L https://github.com/anujdas/cryogen/releases/download/v1.1.0/cryogen-linux-x64.tgz | tar xzC /usr/local/bin
 ```
-The linux binary is compiled with static links and should be dependency-free,
+The Linux binary is compiled with static links and should be dependency-free,
 but if it does not work on your system, try [building from
 source](#from-source).
 
 ### Docker
 
-`cryogen` comes in a Docker image that can be used as though it were a local
+`cryogen` comes in a Docker image that can be used as though it were a native
 installation. For example:
 ```bash
 $ cd path/to/target/repo
@@ -101,7 +104,6 @@ docs](https://crystal-lang.org/docs/installation/) for more information), you
 should be able to build a binary by cloning the repo and running:
 
 ```bash
-$ cd path/to/repo
 $ make build-release
 ```
 
@@ -128,7 +130,7 @@ Flags:
 
 Subcommands:
   edit       # Open the vault in $EDITOR
-  export     # Print decrypted vault contents in shell `eval`-able ENV format
+  export     # Print decrypted vault contents in ENV format
   lock       # Lock the vault
   rekey      # Rotate the vault key
   setup      # Initialize a vault in this directory
@@ -149,20 +151,19 @@ team can access. *Do not lose it.*
 render the vault encryption pointless. Add the key to your `.gitignore` or
 equivalent to prevent this:
 
-```
-# .gitignore
-...
-/.cryogen/secret.key
+```bash
+$ echo "/.cryogen/secret.key" >> .gitignore
+$ git add .cryogen/vault.yml
 ```
 
-### Adding/Editing the vault
+### Editing the vault
 
 Edit the vault using `cryogen edit`. You should configure `$EDITOR` with your
 favourite editor beforehand -- good choices include `nano` and `vim`. You can
 add this to the bottom of your shell's rc file:
 
 ```
-# ~/.bashrc, ~/.zshrc, etc.
+# ~/.bashrc, ~/.zshenv, etc.
 ...
 export EDITOR=vim
 ```
@@ -186,7 +187,9 @@ development:
 production:
   google:
     client_id: my_real_client_id
-    client_secret: my_real_client_secret
+    client_secret: |
+      really long
+      multiline value
   facebook:
     api_key: my_real_api_key
 ```
@@ -211,9 +214,10 @@ export PRODUCTION_GOOGLE_CLIENT_SECRET=my_real_client_secret
 export PRODUCTION_FACEBOOK_API_KEY=my_real_api_key
 ```
 
-This output is suitable for evaluation by `bash` directly, as in `eval
-$(cryogen export)`. Alternatively, `cryogen export --no-subprocess` omits the
-`export` prefix.
+This output is suitable for sourcing by `bash` directly, as in `source
+M(cryogen export)`. Alternatively, `cryogen export --no-subprocess` omits the
+`export` prefix, useful either for keeping values in-process or for saving to a
+`.env` file.
 
 The `--only` flag allows exclusion of prefixes. For example, given the by-stage file above, one might use:
 
@@ -224,6 +228,15 @@ export GOOGLE_CLIENT_ID=my_real_client_id
 export PRODUCTION_GOOGLE_CLIENT_SECRET=my_real_client_secret
 export FACEBOOK_API_KEY=my_real_api_key
 ```
+
+*Note*: `bash` 3.x has [a known bug that affects sourcing the result of
+process
+substitution](http://lists.gnu.org/archive/html/bug-bash/2006-01/msg00018.html).
+Bash 3.2 is standard on Macs, but there are a couple of workarounds:
+- Use a workaround: `. /dev/stdin <<< "$(cryogen export)"`
+- Use `eval`, as in `eval "$(cryogen export)"`
+- Install a newer version of `bash`, e.g., from [homebrew](https://brew.sh/)
+- Use an alternative shell (`zsh`, `fish`, etc.)
 
 ### Locking and Unlocking
 
@@ -258,6 +271,21 @@ The secret key is generated from a cryptographically secure random byte source.
 256 bits are used for each of encryption and signing. The concatenated 512 bits
 form the `.cryogen/secret.key` file, and a base64-encoded version is provided
 to the user as a copy/paste-able key.
+
+Key names are stored unencrypted to ensure that diffs are meaningful --
+`cryogen` expects a VCS, and vault changes are unintelligible in the typical
+VCS patchset without key names to indicate what's changed. Since the vault is
+stored alongside code, the keys stored in the vault can always be ascertained
+by examining the code itself, so disguising them was not a priority (as opposed
+to, say, a cloud password manager, which would try to hide keys as well as
+values).
+
+`cryogen` is written in Crystal partly as an experiment in using a new
+language, mostly to ensure that it can run without dependencies (when compiled
+to a static binary). This means that the 5MB static Linux x64 binary can be
+dropped onto any system, container, or deployment mechanism and run without
+issue. Type safety is a huge plus and eliminates many categories of bugs as
+well.
 
 ## Development
 

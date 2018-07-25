@@ -1,5 +1,9 @@
 # Cryogen Changelog
 
+## Unreleased
+
+* Make multiline values work correctly when exported
+
 ## 1.1.0
 
 * Added `show_key` subcommand for displaying key to an unlocked vault

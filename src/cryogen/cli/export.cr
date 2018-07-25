@@ -21,7 +21,7 @@ module Cryogen
             next unless prefix.starts_with?("#{only_prefix}_")
             prefix = prefix.lchop("#{only_prefix}_")
           end
-          puts "#{"export " unless flags.no_subprocess}#{prefix}=#{value}"
+          puts "#{"export " unless flags.no_subprocess}#{prefix}=\"#{value}\""
         end
       end
     end
