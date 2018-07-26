@@ -3,6 +3,7 @@
 ## Unreleased
 
 * Handle input prompt better (loop until input provided)
+* Preserve original formatting on valid multiline string secrets
 
 ## 1.2.0
 

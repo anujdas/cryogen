@@ -1,4 +1,5 @@
 require "./cryogen/*"
+require "./core_ext/*"
 
 module Cryogen
   BASE_DIR   = ".cryogen"

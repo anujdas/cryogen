@@ -1,4 +1,4 @@
-SOURCES = src/*.cr src/**/*.cr shard.yml shard.lock
+SOURCES = $(shell find src -type f -name '*.cr')
 
 CRYSTAL_BIN ?= $(shell which crystal)
 SHARDS_BIN ?= $(shell which shards)
