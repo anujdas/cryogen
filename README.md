@@ -187,7 +187,7 @@ development:
 production:
   google:
     client_id: my_real_client_id
-    client_secret: |
+    client_secret: |-
       really long
       multiline value
   facebook:
