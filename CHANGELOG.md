@@ -1,5 +1,9 @@
 # Cryogen Changelog
 
+## Unreleased
+
+* Handle input prompt better (loop until input provided)
+
 ## 1.2.0
 
 * Make multiline values work correctly when exported

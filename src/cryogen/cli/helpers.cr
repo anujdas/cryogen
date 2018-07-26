@@ -45,13 +45,14 @@ module Cryogen
 
       def prompt(prompt_str : String, important : Bool = false, echo : Bool = true) : String
         require_tty!
-
         prompt_str = prompt_str.colorize(:yellow).bold if important
-        print "#{prompt_str} "
 
-        raw_input = echo ? gets : STDIN.noecho(&.gets)
-        puts unless echo # this is silly
-        raw_input.to_s.chomp
+        loop do
+          print "#{prompt_str} "
+          input = echo ? gets : STDIN.noecho(&.gets)
+          puts unless echo # this is silly
+          break input if input && !input.blank?
+        end
       end
 
       def success(str : String)
