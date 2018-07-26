@@ -1,6 +1,6 @@
 # Cryogen Changelog
 
-## Unreleased
+## 1.2.1
 
 * Handle input prompt better (loop until input provided)
 * Preserve original formatting on valid multiline string secrets
