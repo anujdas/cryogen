@@ -20,9 +20,17 @@ module Cryogen
     def save!(vault_file : String)
       File.open(vault_file, "w") { |f| to_yaml(f) }
     end
+
+    protected def contents : VaultEntry
+      @contents
+    end
   end
 
   struct LockedVault < Vault
+    def merge(modified_vault : self, key : Key) : self
+      self.class.new(@contents.merge_encrypted(modified_vault.contents, key))
+    end
+
     def unlock!(key : Key) : UnlockedVault
       UnlockedVault.new(@contents.decrypt(key))
     end

@@ -17,14 +17,15 @@ module Cryogen
 
         # dump unencrypted contents for manual editing
         key = obtain_key!
+        vault = LockedVault.load(Cryogen::VAULT_FILE)
         tempfile = Tempfile.open("vault", ".yml") do |f|
-          LockedVault.load(Cryogen::VAULT_FILE).unlock!(key).to_yaml(f)
+          vault.unlock!(key).to_yaml(f)
           f.flush # force buffer write to disk
         end
 
         begin
-          vault = edit_until_valid(tempfile.path)
-          vault.lock!(key).save!(Cryogen::VAULT_FILE)
+          modified_vault = edit_until_valid(tempfile.path).lock!(key)
+          vault.merge(modified_vault, key).save!(Cryogen::VAULT_FILE)
           success "Vault updated! Make sure to commit any changes to #{Cryogen::VAULT_FILE}"
         ensure
           tempfile.delete

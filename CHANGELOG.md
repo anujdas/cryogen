@@ -1,5 +1,10 @@
 # Cryogen Changelog
 
+## Unreleased
+
+* Only change secrets that were actually modified, to prevent vault churn and
+  produce meaningful diffs
+
 ## 1.2.1
 
 * Handle input prompt better (loop until input provided)
