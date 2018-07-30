@@ -1,6 +1,6 @@
 # Cryogen Changelog
 
-## Unreleased
+## 1.2.2
 
 * Only change secrets that were actually modified, to prevent vault churn and
   produce meaningful diffs

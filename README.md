@@ -36,7 +36,7 @@ variables. It aims for simplicity in setup and use.
 
 ```bash
 # install MacOS binary to /usr/local/bin/cryogen
-$ curl -L https://github.com/anujdas/cryogen/releases/download/v1.2.1/cryogen-darwin-x64.tgz | tar xzC /usr/local/bin
+$ curl -L https://github.com/anujdas/cryogen/releases/download/v1.2.2/cryogen-darwin-x64.tgz | tar xzC /usr/local/bin
 
 $ cryogen setup  # create new vault -- make sure to copy and save key!
 $ echo "/.cryogen/secret.key" >> .gitignore  # ignore key
@@ -61,7 +61,7 @@ Download the latest darwin-x64 tarball and extract. Copy the enclosed binary to
 a location in your path.  For instance:
 ```bash
 # install MacOS amd64 binary to /usr/local/bin/cryogen
-$ curl -L https://github.com/anujdas/cryogen/releases/download/v1.2.1/cryogen-darwin-x64.tgz | tar xzC /usr/local/bin
+$ curl -L https://github.com/anujdas/cryogen/releases/download/v1.2.2/cryogen-darwin-x64.tgz | tar xzC /usr/local/bin
 ```
 
 ### Linux
@@ -70,7 +70,7 @@ Download the latest linux-x64 tarball and extract. Copy the enclosed binary to
 a location in your path. For instance:
 ```bash
 # install Linux amd64 binary to /usr/local/bin/cryogen
-$ curl -L https://github.com/anujdas/cryogen/releases/download/v1.2.1/cryogen-linux-x64.tgz | tar xzC /usr/local/bin
+$ curl -L https://github.com/anujdas/cryogen/releases/download/v1.2.2/cryogen-linux-x64.tgz | tar xzC /usr/local/bin
 ```
 The Linux binary is compiled with static links and should be dependency-free,
 but if it does not work on your system, try [building from
