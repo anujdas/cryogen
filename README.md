@@ -64,6 +64,11 @@ a location in your path.  For instance:
 $ curl -L https://github.com/anujdas/cryogen/releases/download/v1.2.2/cryogen-darwin-x64.tgz | tar xzC /usr/local/bin
 ```
 
+Note that MacOS does not support statically linked binaries, so you might need
+to install dependencies to get the binary to work. The easiest way to get them
+all is to install Crystal itself, e.g., `brew install crystal` (assuming
+Homebrew is installed).
+
 ### Linux
 
 Download the latest linux-x64 tarball and extract. Copy the enclosed binary to
