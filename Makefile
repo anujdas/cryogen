@@ -20,7 +20,7 @@ build-release: $(SOURCES)
 	@$(SHARDS_BIN) build --release $(CRFLAGS)
 
 build-docker: $(SOURCES)
-	@docker run --rm -v `pwd`:/workspace -it crystallang/crystal:latest /workspace/script/docker-build.sh
+	@docker run --rm -v `pwd`:/workspace -it crystallang/crystal:0.27.0 /workspace/script/docker-build.sh
 	@docker build -t cryogen .
 
 install: build-release
@@ -31,7 +31,7 @@ uninstall:
 	@rm -f "$(BINDIR)/cryogen"
 
 release:
-	@docker run --rm -v `pwd`:/workspace -it crystallang/crystal:latest /workspace/script/docker-build.sh
+	@docker run --rm -v `pwd`:/workspace -it crystallang/crystal:0.27.0 /workspace/script/docker-build.sh
 	@docker build -t cryogen .
 	@tar czvf bin/cryogen-linux-x64.tgz -C bin cryogen
 	@rm -f bin/cryogen bin/cryogen.dwarf

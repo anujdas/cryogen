@@ -1,5 +1,9 @@
 # Cryogen Changelog
 
+## 1.2.3 (Unreleased)
+
+* Switched to Crystal 0.27.0 language and compiler
+
 ## 1.2.2
 
 * Only change secrets that were actually modified, to prevent vault churn and

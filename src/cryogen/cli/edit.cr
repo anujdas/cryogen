@@ -1,5 +1,4 @@
 require "admiral"
-require "tempfile"
 
 require "./helpers"
 require "../error"
@@ -18,7 +17,7 @@ module Cryogen
         # dump unencrypted contents for manual editing
         key = obtain_key!
         vault = LockedVault.load(Cryogen::VAULT_FILE)
-        tempfile = Tempfile.open("vault", ".yml") do |f|
+        tempfile = File.tempfile("vault", ".yml") do |f|
           vault.unlock!(key).to_yaml(f)
           f.flush # force buffer write to disk
         end
